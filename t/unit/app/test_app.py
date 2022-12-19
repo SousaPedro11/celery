@@ -71,7 +71,7 @@ class test_task_join_will_block:
 
 class test_App:
 
-    def setup(self):
+    def setup_method(self):
         self.app.add_defaults(deepcopy(self.CELERY_TEST_CONFIG))
 
     def test_now(self):
@@ -113,9 +113,9 @@ class test_App:
     @patch('celery.security.setup_security')
     def test_setup_security(self, setup_security):
         self.app.setup_security(
-            {'json'}, 'key', 'cert', 'store', 'digest', 'serializer')
+            {'json'}, 'key', None, 'cert', 'store', 'digest', 'serializer')
         setup_security.assert_called_with(
-            {'json'}, 'key', 'cert', 'store', 'digest', 'serializer',
+            {'json'}, 'key', None, 'cert', 'store', 'digest', 'serializer',
             app=self.app)
 
     def test_task_autofinalize_disabled(self):
@@ -591,8 +591,8 @@ class test_App:
         mocked_celery.main.assert_called_with(
             args=['worker', '--help'], standalone_mode=False)
 
-    def test_config_from_envvar(self):
-        os.environ['CELERYTEST_CONFIG_OBJECT'] = 't.unit.app.test_app'
+    def test_config_from_envvar(self, monkeypatch):
+        monkeypatch.setenv("CELERYTEST_CONFIG_OBJECT", 't.unit.app.test_app')
         self.app.config_from_envvar('CELERYTEST_CONFIG_OBJECT')
         assert self.app.conf.THIS_IS_A_KEY == 'this is a value'
 
@@ -742,7 +742,7 @@ class test_App:
         appid = id(app1)
         assert app1 in _state._get_active_apps()
         app1.close()
-        del(app1)
+        del (app1)
 
         gc.collect()
 
@@ -1023,7 +1023,7 @@ class test_App:
         assert oid1 == oid2
 
     def test_backend(self):
-        # Test that app.bakend returns the same backend in single thread
+        # Test that app.backend returns the same backend in single thread
         backend1 = self.app.backend
         backend2 = self.app.backend
         assert isinstance(backend1, Backend)
@@ -1031,7 +1031,7 @@ class test_App:
         assert backend1 is backend2
 
     def test_thread_backend(self):
-        # Test that app.bakend returns the new backend for each thread
+        # Test that app.backend returns the new backend for each thread
         main_backend = self.app.backend
         from concurrent.futures import ThreadPoolExecutor
         with ThreadPoolExecutor(max_workers=1) as executor:

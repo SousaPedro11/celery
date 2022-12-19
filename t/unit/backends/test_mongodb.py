@@ -29,14 +29,14 @@ MONGODB_COLLECTION = 'collection1'
 MONGODB_GROUP_COLLECTION = 'group_collection1'
 # uri with user, password, database name, replica set, DNS seedlist format
 MONGODB_SEEDLIST_URI = ('srv://'
-                      'celeryuser:celerypassword@'
-                      'dns-seedlist-host.example.com/'
-                      'celerydatabase')
+                        'celeryuser:celerypassword@'
+                        'dns-seedlist-host.example.com/'
+                        'celerydatabase')
 MONGODB_BACKEND_HOST = [
-                'mongo1.example.com:27017',
-                'mongo2.example.com:27017',
-                'mongo3.example.com:27017',
-            ]
+    'mongo1.example.com:27017',
+    'mongo2.example.com:27017',
+    'mongo3.example.com:27017',
+]
 CELERY_USER = 'celeryuser'
 CELERY_PASSWORD = 'celerypassword'
 CELERY_DATABASE = 'celerydatabase'
@@ -64,6 +64,7 @@ def fake_resolver_dnspython():
 
     return mock_resolver
 
+
 class test_MongoBackend:
     default_url = 'mongodb://uuuu:pwpw@hostname.dom/database'
     replica_set_url = (
@@ -76,7 +77,7 @@ class test_MongoBackend:
         'hostname.dom/database?replicaSet=rs'
     )
 
-    def setup(self):
+    def setup_method(self):
         self.patching('celery.backends.mongodb.MongoBackend.encode')
         self.patching('celery.backends.mongodb.MongoBackend.decode')
         self.patching('celery.backends.mongodb.Binary')
@@ -235,7 +236,7 @@ class test_MongoBackend:
         assert compliant_uri('mongodb://') == 'mongodb://localhost'
 
         assert compliant_uri('mongodb+something://host') == \
-               'mongodb+something://host'
+            'mongodb+something://host'
 
         assert compliant_uri('something://host') == 'mongodb+something://host'
 
@@ -694,7 +695,7 @@ class test_MongoBackend_store_get_result:
     @pytest.mark.parametrize("serializer,result_type,result", [
         (s, type(i['result']), i['result']) for i in SUCCESS_RESULT_TEST_DATA
         for s in i['serializers']]
-                             )
+    )
     def test_encode_success_results(self, mongo_backend_factory, serializer,
                                     result_type, result):
         backend = mongo_backend_factory(serializer=serializer)

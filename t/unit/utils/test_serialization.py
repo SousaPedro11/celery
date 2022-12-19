@@ -8,11 +8,8 @@ import pytest
 import pytz
 from kombu import Queue
 
-from celery.utils.serialization import (STRTOBOOL_DEFAULT_TABLE,
-                                        UnpickleableExceptionWrapper,
-                                        ensure_serializable,
-                                        get_pickleable_etype, jsonify,
-                                        strtobool)
+from celery.utils.serialization import (STRTOBOOL_DEFAULT_TABLE, UnpickleableExceptionWrapper, ensure_serializable,
+                                        get_pickleable_etype, jsonify, strtobool)
 
 
 class test_AAPickle:
@@ -99,10 +96,7 @@ class test_strtobool:
         assert strtobool(s) == b
 
     def test_unknown_value(self):
-        with pytest.raises(TypeError,
-                           # todo replace below when dropping python 2.7
-                           # match="Cannot coerce 'foo' to type bool"):
-                           match=r"Cannot coerce u?'foo' to type bool"):
+        with pytest.raises(TypeError, match="Cannot coerce 'foo' to type bool"):
             strtobool('foo')
 
     def test_no_op(self):

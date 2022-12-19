@@ -99,9 +99,9 @@ class test_ScheduleEntry:
         e1 = self.create_entry(schedule=timedelta(seconds=10))
         e2 = self.create_entry(schedule=timedelta(seconds=2))
         # order doesn't matter, see comment in __lt__
-        res1 = e1 < e2  # noqa
+        res1 = e1 < e2
         try:
-            res2 = e1 < object()  # noqa
+            res2 = e1 < object()
         except TypeError:
             pass
 
@@ -164,6 +164,7 @@ class mocked_schedule(schedule):
 
 always_due = mocked_schedule(True, 1)
 always_pending = mocked_schedule(False, 1)
+always_pending_left_10_milliseconds = mocked_schedule(False, 0.01)
 
 
 class test_Scheduler:
@@ -353,6 +354,12 @@ class test_Scheduler:
         scheduler.add(name='test_pending_tick',
                       schedule=always_pending)
         assert scheduler.tick() == 1 - 0.010
+
+    def test_pending_left_10_milliseconds_tick(self):
+        scheduler = mScheduler(app=self.app)
+        scheduler.add(name='test_pending_left_10_milliseconds_tick',
+                      schedule=always_pending_left_10_milliseconds)
+        assert scheduler.tick() == 0.010 - 0.010
 
     def test_honors_max_interval(self):
         scheduler = mScheduler(app=self.app)
@@ -689,16 +696,19 @@ class test_PersistentScheduler:
                 'first_missed', 'first_missed',
                 last_run_at=now_func() - timedelta(minutes=2),
                 total_run_count=10,
+                app=self.app,
                 schedule=app_schedule['first_missed']['schedule']),
             'second_missed': beat.ScheduleEntry(
                 'second_missed', 'second_missed',
                 last_run_at=now_func() - timedelta(minutes=2),
                 total_run_count=10,
+                app=self.app,
                 schedule=app_schedule['second_missed']['schedule']),
             'non_missed': beat.ScheduleEntry(
                 'non_missed', 'non_missed',
                 last_run_at=now_func() - timedelta(minutes=2),
                 total_run_count=10,
+                app=self.app,
                 schedule=app_schedule['non_missed']['schedule']),
         }
 
